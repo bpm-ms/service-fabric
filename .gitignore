@@ -82,6 +82,9 @@ From: AzSec@microsoft.com
 # Linux external folder
 external/
 
+# Temporary folder for external package archive file downloads
+tmp/
+
 # VS generated files
 **/.vscode/*
 **/.vs/*

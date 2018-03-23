@@ -53,7 +53,7 @@ ScriptPath=`pwd -P`
 popd > /dev/null
 ProjRoot=${ScriptPath}/..
 ProjBinRoot=${ProjRoot}
-LibPath=${ProjRoot}/external/WinFab.Linux.Libs
+PrebuiltRoot=${ProjRoot}/external/
 CleanBuildDrop="-nc"
 DisablePrecompile="-p"
 SkipBuild="false"
@@ -69,16 +69,12 @@ NumProc=0
 BuildThirdPartyLib="ON"
 VERBOSE=0
 CLEAN_DEPS=0
-#WinFab.Linux.Libs library version
-LinuxLibVersion="WinFab.Linux.Libs.2.2.7"
+PrebuiltBlobStore="https://sfossdeps.blob.core.windows.net/binaries/"
+PrebuiltPackageVersion=${PrebuiltPackageVersion:-0.1}
+
 if [ $LINUX_DISTRIBUTION = "REDHAT" ]; then
-    LinuxLibVersion="WinFab.Linux.Libs.2.2.2-centos"
+    PrebuiltPackageVersion=$PrebuiltPackageVersion"-rhel"
 fi
-CoreCLRLibVersion="WinFab.CoreCLR.Libs.6.2.183"
-SFXLibVersion="ServiceFabric.Explorer.2017.11.13.1"
-KtlLibDebugVersion="WinFab.Ktl.Linux.debug.1.1.2.52"
-KtlLibRetailVersion="WinFab.Ktl.Linux.retail.1.1.2.52"
-SFUpgradeTestVersion="Microsoft.ServiceFabric.Upgrade.Test.Internal.6.0.0.22"
 
 export CMAKE_NO_VERBOSE=1
 
@@ -86,21 +82,29 @@ export CMAKE_NO_VERBOSE=1
 # After the docker image has this, this should be removed.
 InstallPkgs()
 {
-    ${ProjRoot}/src/prod/tools/linux/init.sh ${LinuxLibVersion} ${CoreCLRLibVersion} ${SFXLibVersion} ${KtlLibDebugVersion} ${KtlLibRetailVersion} ${SFUpgradeTestVersion} ${CloudBuild}
-    if [ $? != 0 ]; then
-        return 1
+    echo "Downloading legacy prebuilt binary build dependencies..."
+    _PrebuiltPackageName="v"$PrebuiltPackageVersion".tgz"
+    _PrebuiltPackageURL=$PrebuiltBlobStore$_PrebuiltPackageName
+    _PrebuiltPackageTempPath=/tmp/$_PrebuiltPackageName
+
+    if [ -f $PrebuiltRoot/VERSION ]; then
+        CurrentPrebuiltPackageVersion=`cat $PrebuiltRoot/VERSION`
+    else
+        CurrentPrebuiltPackageVersion="0.0"
     fi
 
-    if [ -e ${LibPath}/Boost_1_61_0/lib/libc%2B%2B.so.1 ]
-    then
-       mv ${LibPath}/Boost_1_61_0/lib/libc%2B%2B.so.1 ${LibPath}/Boost_1_61_0/lib/libc++.so.1
-       rm ${LibPath}/Boost_1_61_0/lib/libc%2*.so.1
+    if [ "$CurrentPrebuiltPackageVersion" != "${PrebuiltPackageVersion}" ]; then
+        httpResp=$(curl -w %{http_code} $_PrebuiltPackageURL -o $_PrebuiltPackageTempPath)
+        if [ "$httpResp" != "200" ]; then
+            echo "HTTP $httpResp; Failed to reach prebuilt binary package with version=$PrebuiltPackageVersion"
+            exit -1
+        fi
+        echo "Downloaded prebuilt binary dependencies..."
+        echo "Installing prebuilt binary dependencies..."
+        tar -xvf $_PrebuiltPackageTempPath -C ${ProjRoot}
     fi
-    if [ -e ${LibPath}/Boost_1_61_0/lib/libc%25252B%25252B.so.1 ]
-    then
-       mv ${LibPath}/Boost_1_61_0/lib/libc%25252B%25252B.so.1 ${LibPath}/Boost_1_61_0/lib/libc++.so.1
-       rm ${LibPath}/Boost_1_61_0/lib/libc%2*.so.1
-    fi
+
+
 }
 
 InstallDeps()

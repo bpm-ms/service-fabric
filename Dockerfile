@@ -2,11 +2,6 @@ FROM ubuntu:16.04
 
 ADD DOCKER_VERSION .
 
-# Add legacy binary dependencies
-ADD https://sfossdeps.blob.core.windows.net/binaries/v0.1.tgz /tmp
-RUN mkdir -p /external && tar -xvf /tmp/v0.1.tgz -C / && \
-     rm /tmp/v0.1.tgz
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
     openssh-server \
@@ -38,7 +33,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libncursesw5-dev \
     swig \
     libedit-dev \
-    chrpath
+    chrpath \
+    curl
 
 # Install the .NET runtime dependency.  Required for running the product.
 RUN sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ xenial main" > /etc/apt/sources.list.d/dotnetdev.list' && \
