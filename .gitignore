@@ -356,7 +356,6 @@ project.lock.json
 project.assets.json
 /src/prod/src/managed/Api/CoreCLRDlls/Microsoft.ServiceFabric.Internal.Strings/StringResources.cs
 /src/prod/src/managed/Api/CoreCLRDlls/Microsoft.ServiceFabric.Internal.Strings/StringResources.resources
-/src/prod/src/managed/Api/CoreCLRDlls/System.Fabric.Management.ServiceModel/ServiceFabricServiceModel.cs
 /src/prod/src/managed/Api/CoreCLRDlls/System.Fabric.Management/PublicConfigurations.csv
 /src/prod/src/managed/Api/CoreCLRDlls/System.Fabric.Management/Configurations.csv
 /src/prod/src/managed/Api/CoreCLRDlls/system.fabric.strings/StringResources.resources
